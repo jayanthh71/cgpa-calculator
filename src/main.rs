@@ -28,7 +28,7 @@ fn main() {
         .unwrap();
 
     let courses: Vec<(String, u32, String)> =
-        (0..num_courses).map(|_| get_course_details()).collect();
+        (0..num_courses).map(|i| get_course_details(i)).collect();
 
     if total_credits != courses.iter().map(|(_, credit, _)| credit).sum() {
         outro_cancel("Total credits do not match the sum of course credits!").unwrap();
@@ -56,8 +56,8 @@ fn main() {
     outro_note("YOUR GPA", format!("GPA: {:.2}", gpa)).unwrap();
 }
 
-fn get_course_details() -> (String, u32, String) {
-    let course_code: String = input("Enter course code: ")
+fn get_course_details(course_index: u32) -> (String, u32, String) {
+    let course_code: String = input(format!("Enter course {} code: ", course_index + 1))
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
@@ -73,7 +73,7 @@ fn get_course_details() -> (String, u32, String) {
         .interact()
         .unwrap();
 
-    let course_credit: u32 = input("Enter course credit: ")
+    let course_credit: u32 = input(format!("Enter course {} credit: ", course_index + 1))
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
@@ -86,7 +86,7 @@ fn get_course_details() -> (String, u32, String) {
         .interact()
         .unwrap();
 
-    let course_grade: String = input("Enter course grade: ")
+    let course_grade: String = input(format!("Enter course {} grade: ", course_index + 1))
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
