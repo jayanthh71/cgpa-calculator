@@ -1,10 +1,12 @@
-use cliclack::input;
+use cliclack::{input, outro_cancel, outro_note};
 
 fn main() {
-    let total_credits: i32 = input("Enter total credits: ")
+    let total_credits: u32 = input("Enter total credits: ")
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
+            } else if input == "0" {
+                Err("Value must be greater than 0")
             } else {
                 Ok(())
             }
@@ -12,10 +14,12 @@ fn main() {
         .interact()
         .unwrap();
 
-    let num_courses: i32 = input("Enter number of courses: ")
+    let num_courses: u32 = input("Enter number of courses: ")
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
+            } else if input == "0" {
+                Err("Value must be greater than 0")
             } else {
                 Ok(())
             }
@@ -23,11 +27,11 @@ fn main() {
         .interact()
         .unwrap();
 
-    let courses: Vec<(String, i32, String)> =
+    let courses: Vec<(String, u32, String)> =
         (0..num_courses).map(|_| get_course_details()).collect();
 
     if total_credits != courses.iter().map(|(_, credit, _)| credit).sum() {
-        println!("Total credits do not match the sum of course credits!");
+        outro_cancel("Total credits do not match the sum of course credits!").unwrap();
         return;
     }
 
@@ -49,14 +53,19 @@ fn main() {
         .sum::<f64>()
         / total_credits as f64;
 
-    println!("GPA: {:.2}", gpa);
+    outro_note("YOUR GPA", format!("GPA: {:.2}", gpa)).unwrap();
 }
 
-fn get_course_details() -> (String, i32, String) {
+fn get_course_details() -> (String, u32, String) {
     let course_code: String = input("Enter course code: ")
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
+            } else if input.len() != 6
+                || !input.chars().take(4).all(|c| c.is_alphabetic())
+                || !input.chars().skip(4).all(|c| c.is_numeric())
+            {
+                Err("Inavlid course code!")
             } else {
                 Ok(())
             }
@@ -64,10 +73,12 @@ fn get_course_details() -> (String, i32, String) {
         .interact()
         .unwrap();
 
-    let course_credit: i32 = input("Enter course credit: ")
+    let course_credit: u32 = input("Enter course credit: ")
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
+            } else if input == "0" {
+                Err("Value must be greater than 0")
             } else {
                 Ok(())
             }
@@ -79,6 +90,14 @@ fn get_course_details() -> (String, i32, String) {
         .validate(|input: &String| {
             if input.is_empty() {
                 Err("Value is required!")
+            } else if input.chars().count() != 1
+                || !input.chars().all(|c| c.is_alphabetic())
+                || !matches!(
+                    input.to_uppercase().as_str(),
+                    "S" | "A" | "B" | "C" | "D" | "E" | "F"
+                )
+            {
+                Err("Invalid grade!")
             } else {
                 Ok(())
             }
@@ -86,5 +105,9 @@ fn get_course_details() -> (String, i32, String) {
         .interact()
         .unwrap();
 
-    return (course_code, course_credit, course_grade);
+    (
+        course_code.to_uppercase(),
+        course_credit,
+        course_grade.to_uppercase(),
+    )
 }
